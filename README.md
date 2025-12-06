@@ -1,50 +1,13 @@
-# Welcome to your Expo app 👋
+# CLI vs Expo Router 간단 비교 
 
-This is an [Expo](https://expo.dev) project created with [`create-expo-app`](https://www.npmjs.com/package/create-expo-app).
+🔵 Expo Router (파일 기반 라우팅)
+- 파일 이름 = 라우팅 경로
+- _layout.tsx = 폴더 내 화면들의 공통 UI 틀
+- [name].tsx = 동적 라우트 처리 (/folder/:name)
+- Stack / Tabs 네비게이션이 파일 구조만으로 자동 구성됨
 
-## Get started
-
-1. Install dependencies
-
-   ```bash
-   npm install
-   ```
-
-2. Start the app
-
-   ```bash
-   npx expo start
-   ```
-
-In the output, you'll find options to open the app in a
-
-- [development build](https://docs.expo.dev/develop/development-builds/introduction/)
-- [Android emulator](https://docs.expo.dev/workflow/android-studio-emulator/)
-- [iOS simulator](https://docs.expo.dev/workflow/ios-simulator/)
-- [Expo Go](https://expo.dev/go), a limited sandbox for trying out app development with Expo
-
-You can start developing by editing the files inside the **app** directory. This project uses [file-based routing](https://docs.expo.dev/router/introduction).
-
-## Get a fresh project
-
-When you're ready, run:
-
-```bash
-npm run reset-project
-```
-
-This command will move the starter code to the **app-example** directory and create a blank **app** directory where you can start developing.
-
-## Learn more
-
-To learn more about developing your project with Expo, look at the following resources:
-
-- [Expo documentation](https://docs.expo.dev/): Learn fundamentals, or go into advanced topics with our [guides](https://docs.expo.dev/guides).
-- [Learn Expo tutorial](https://docs.expo.dev/tutorial/introduction/): Follow a step-by-step tutorial where you'll create a project that runs on Android, iOS, and the web.
-
-## Join the community
-
-Join our community of developers creating universal apps.
-
-- [Expo on GitHub](https://github.com/expo/expo): View our open source platform and contribute.
-- [Discord community](https://chat.expo.dev): Chat with Expo users and ask questions.
+🔴 React Navigation (CLI 방식)
+- 라우트는 파일이 아니라 코드로 직접 등록해야 함
+- 파일 이름과 URL은 아무 관련 없음
+- _layout.tsx 같은 레이아웃 개념 없음
+- 동적 라우트도 params를 직접 관리
