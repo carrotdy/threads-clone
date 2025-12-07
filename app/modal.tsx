@@ -1,9 +1,12 @@
 import { FontAwesome, Ionicons } from "@expo/vector-icons";
+import * as Location from 'expo-location';
 import { useRouter } from "expo-router";
 import React, { useState } from "react";
 import {
+    Alert,
     FlatList,
     Image,
+    Linking,
     Pressable,
     StyleSheet,
     Text,
@@ -56,6 +59,8 @@ export default function Modal() {
     const [replyOption, setReplyOption] = useState("Anyone");
     const [isDropdownVisible, setIsDropdownVisible] = useState(false);
     const [isPosting, setIsPosting] = useState(false);
+    const [location, setLocation] = useState<Location.LocationObject | null>(null);
+    const [errorMsg, setErrorMsg] = useState<string | null>(null);
 
     const replyOptions = ["Anyone", "Profiles you follow", "Mentioned only"];
 
@@ -90,7 +95,40 @@ export default function Modal() {
 
     const removeImageFromThread = (id: string, uriToRemove: string) => { };
 
-    const getMyLocation = async (id: string) => { };
+    const getMyLocation = async (id: string) => {
+        let { status } = await Location.requestForegroundPermissionsAsync();
+        if (status !== "granted") {
+            Alert.alert(
+                "Location permission not granted",
+                "Please grant location permission to use this feature",
+                [
+                    {
+                        text: "Open settings",
+                        onPress: () => {
+                            Linking.openSettings();
+                        },
+                    },
+                    {
+                        text: "Cancel",
+                    },
+                ]
+            );
+            return;
+        }
+
+        const location = await Location.getCurrentPositionAsync({});
+
+        setThreads((prevThreads) =>
+            prevThreads.map((thread) =>
+                thread.id === id
+                    ? {
+                        ...thread,
+                        location: [location.coords.latitude, location.coords.longitude],
+                    }
+                    : thread
+            )
+        );
+    };
 
     const renderThreadItem = ({
         item,
