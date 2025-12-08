@@ -1,5 +1,7 @@
 import { FontAwesome, Ionicons } from "@expo/vector-icons";
+import * as ImagePicker from 'expo-image-picker';
 import * as Location from 'expo-location';
+import * as MediaLibrary from 'expo-media-library';
 import { useRouter } from "expo-router";
 import React, { useState } from "react";
 import {
@@ -8,11 +10,12 @@ import {
     Image,
     Linking,
     Pressable,
+    Modal as RNModal,
     StyleSheet,
     Text,
     TextInput,
     TouchableOpacity,
-    View
+    View,
 } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 
@@ -61,6 +64,7 @@ export default function Modal() {
     const [isPosting, setIsPosting] = useState(false);
     const [location, setLocation] = useState<Location.LocationObject | null>(null);
     const [errorMsg, setErrorMsg] = useState<string | null>(null);
+    const [image, setImage] = useState<string | null>(null);
 
     const replyOptions = ["Anyone", "Profiles you follow", "Mentioned only"];
 
@@ -76,8 +80,11 @@ export default function Modal() {
         )
     };
 
-    const canAddThread = (threads.at(-1)?.text.trim().length ?? 0) > 0;
-    const canPost = threads.every((thread) => thread.text.trim().length > 0);
+    const canAddThread =
+        (threads.at(-1)?.text.trim().length ?? 0) > 0 ||
+        (threads.at(-1)?.imageUris.length ?? 0) > 0;
+    const canPost = threads.every(
+        (thread) => thread.text.trim().length || thread.imageUris.length > 0);
 
     const addImageToThread = (id: string, uri: string) => { };
 
@@ -89,9 +96,93 @@ export default function Modal() {
         )
     };
 
-    const pickImage = async (id: string) => { };
+    const pickImage = async (id: string) => {
+        const permissionResult = await ImagePicker.requestMediaLibraryPermissionsAsync();
 
-    const takePhoto = async (id: string) => { };
+        if (!permissionResult.granted) {
+            Alert.alert(
+                'Photos permission not granted',
+                'please grant photos permission to use this feature',
+                [
+                    { text: "Open settings", onPress: () => Linking.openSettings() },
+                    {
+                        text: "Cancle"
+                    }
+                ]
+            );
+            return;
+        }
+
+        let result = await ImagePicker.launchImageLibraryAsync({
+            mediaTypes: ['images', 'livePhotos', 'videos'],
+            allowsMultipleSelection: true,
+            selectionLimit: 5,
+        });
+
+        console.log("iamge", result);
+
+        if (!result.canceled) {
+            setThreads((prevThreads) =>
+                prevThreads.map((thread) =>
+                    thread.id === id
+                        ? {
+                            ...thread,
+                            imageUris: thread.imageUris.concat(
+                                (result.assets ?? []).map((asset: { uri: string }) => asset.uri) ?? []
+                            ),
+                        } : thread
+                )
+            )
+        }
+    };
+
+    const takePhoto = async (id: string) => {
+        const permissionResult = await ImagePicker.requestCameraPermissionsAsync();
+
+        if (!permissionResult.granted) {
+            Alert.alert(
+                'Camera permission not granted',
+                'please grant camera permission to use this feature',
+                [
+                    { text: "Open settings", onPress: () => Linking.openSettings() },
+                    {
+                        text: "Cancle"
+                    }
+                ]
+            );
+            return;
+        }
+
+        let result = await ImagePicker.launchCameraAsync({
+            mediaTypes: ['images', 'livePhotos', 'videos'],
+            allowsMultipleSelection: true,
+            selectionLimit: 5,
+        });
+
+        console.log("camera", result);
+
+        const status = (await MediaLibrary.requestPermissionsAsync()).status
+
+        //MediaLibrary 사진 저장 및 불러오기
+        if (status === 'granted' && result.assets?.[0].uri) {
+            MediaLibrary.saveToLibraryAsync(result.assets?.[0].uri);
+        }
+
+        if (!result.canceled) {
+            setThreads((prevThreads) =>
+                prevThreads.map((thread) =>
+                    thread.id === id
+                        ? {
+                            ...thread,
+                            imageUrls: thread.imageUris.concat(
+                                result.assets?.map((asset) => asset.uri) ?? []
+                            ),
+                        }
+                        : thread
+                )
+            );
+        }
+    };
 
     const removeImageFromThread = (id: string, uriToRemove: string) => { };
 
@@ -265,10 +356,34 @@ export default function Modal() {
                 keyboardShouldPersistTaps="handled"
             />
 
+            <RNModal
+                transparent={true}
+                visible={isDropdownVisible}
+                animationType="fade"
+                onRequestClose={() => setIsDropdownVisible(false)}
+            >
+                <Pressable
+                    style={styles.modalOverlay}
+                    onPress={() => setIsDropdownVisible(false)}
+                >
+                    <View
+                        style={[
+                            styles.dropdownContainer,
+                            { bottom: insets.bottom + 10 }
+                        ]}
+                    >
+                        {replyOptions.map((option) => (
+                            <Pressable key={option}>
+                                <Text style={styles.dropdownOptionText}>{option}</Text>
+                            </Pressable>
+                        ))}
+                    </View>
+                </Pressable>
+            </RNModal>
             <View
                 style={[
                     styles.footer,
-                    { paddingBottom: insets.bottom },
+                    { paddingBottom: 10 },
                 ]}
             >
                 <Pressable onPress={() => setIsDropdownVisible(true)}>
@@ -441,17 +556,17 @@ const styles = StyleSheet.create({
         flex: 1,
         backgroundColor: "rgba(0, 0, 0, 0.4)",
         justifyContent: "flex-end",
+        alignItems: "flex-start"
     },
     dropdownContainer: {
         backgroundColor: "#fff",
         borderRadius: 10,
         marginHorizontal: 10,
-        overflow: "hidden",
-        marginBottom: 5,
+        paddingHorizontal: 20,
+        paddingBottom: 20
     },
     dropdownOption: {
         paddingVertical: 15,
-        paddingHorizontal: 20,
         borderBottomWidth: StyleSheet.hairlineWidth,
         borderBottomColor: "#e5e5e5",
     },
@@ -459,6 +574,7 @@ const styles = StyleSheet.create({
     dropdownOptionText: {
         fontSize: 16,
         color: "#000",
+        paddingTop: 30
     },
     selectedOptionText: {
         fontWeight: "600",
