@@ -1,6 +1,7 @@
+import { AuthContext } from "@/app/_layout";
 import { BlurView } from "expo-blur";
 import { usePathname, useRouter } from "expo-router";
-import React from "react";
+import React, { useContext } from "react";
 import { Image, StyleSheet, Text, TouchableOpacity, View } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 
@@ -8,7 +9,8 @@ export default function Index() {
     const router = useRouter();
     const pathname = usePathname();
     const insets = useSafeAreaInsets();
-    const isLoggedIn = false;
+    const { user } = useContext(AuthContext);
+    const isLoggedIn = !!user;
 
     return (
         <View style={[style.container, { paddingTop: insets.top + 20 }]}>
