@@ -1,35 +1,24 @@
-import { useLocalSearchParams, useRouter } from "expo-router";
-import { Text, TouchableOpacity, View } from "react-native";
+;
+import {
+    StyleSheet,
+    Text,
+    View
+} from "react-native";
+
 
 export default function Index() {
-    const router = useRouter();
-    const { username } = useLocalSearchParams<{ username?: string}>();
-
     return (
-        <View
-            style={{
-                flex: 1,
-                justifyContent: "center",
-                alignItems: "center"
-            }}>
-            <View>
-                <TouchableOpacity 
-                onPress={() => router.push(`/${username}`)}>
-                    <Text>Threads</Text>
-                </TouchableOpacity>
-            </View>
-            <View>
-                <TouchableOpacity
-                onPress={() => router.push(`/${username}/replies`)}>
-                    <Text>Replies</Text>
-                </TouchableOpacity>
-            </View>
-            <View>
-                <TouchableOpacity
-                onPress={() => router.push(`/${username}/reposts`)}>
-                    <Text>Reposts</Text>
-                </TouchableOpacity>
-            </View>
+        <View style={styles.tabBar}>
+            <Text>Threads will be here</Text>
         </View>
+
     )
 }
+
+const styles = StyleSheet.create({
+    tabBar: {
+        flexDirection: "row",
+        justifyContent: "space-between",
+        marginTop: 20
+    },
+});

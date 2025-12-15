@@ -1,38 +1,45 @@
 import AsyncStorage from '@react-native-async-storage/async-storage';
+import { DefaultTheme, ThemeProvider } from "@react-navigation/native";
 import { router, Stack } from "expo-router";
 import * as SecureStore from 'expo-secure-store';
-import { createContext, useState } from "react";
+import { createContext, useEffect, useState } from "react";
 import { Alert } from "react-native";
+import { SafeAreaProvider, SafeAreaView } from 'react-native-safe-area-context';
 
-type User = {
-  username: string;
-  description: string;
+interface User {
+  id: string;
+  name: string;
   profileImageUrl: string;
-};
+  description: string;
+}
 
-type AuthContextType = {
+export const AuthContext = createContext<{
   user: User | null;
-  login: () => Promise<void>;
-  logout: () => Promise<void>;
-};
-
-export const AuthContext = createContext<AuthContextType>({
+  login?: () => Promise<any>;
+  logout?: () => Promise<any>;
+}>({
   user: null,
-  login: async () => { },
-  logout: async () => { },
 });
 
 // stack처럼 쌓이게됨
 export default function RootLayout() {
-  const [user, setUser] = useState(null);
+  const [user, setUser] = useState<User | null>(null);
+
+  const WhiteTheme = {
+    ...DefaultTheme,
+    colors: {
+      ...DefaultTheme.colors,
+      background: "#fff",
+    },
+  };
 
   const login = () => {
     return fetch("/login", {
       method: "POST",
       body: JSON.stringify({
-        username: "dayoung",
+        username: "zerocho",
         password: "1234",
-        description: "lover, programmer",
+        description: "🐢 lover, programmer, youtuber",
         profileImageUrl:
           "https://avatars.githubusercontent.com/u/885857?v=4",
       })
@@ -73,12 +80,26 @@ export default function RootLayout() {
     ]);
   };
 
+  //로그인 유지
+  useEffect(() => {
+    AsyncStorage.getItem("user").then((user) => {
+      setUser(user ? JSON.parse(user) : null)
+    })
+    //TODO: AccessToken 유효한지 검사
+  }, [])
+
   return (
-    <AuthContext.Provider value={{ user, login, logout }}>
-      <Stack screenOptions={{ headerShown: false }}>
-        <Stack.Screen name="(tabs)" />
-        <Stack.Screen name="modal" options={{ presentation: "modal" }} />
-      </Stack>
-    </AuthContext.Provider>
+    <SafeAreaProvider>
+      <ThemeProvider value={WhiteTheme}>
+        <AuthContext.Provider value={{ user, login, logout }}>
+          <SafeAreaView style={{ flex: 1 }} edges={["top", "bottom"]}>
+            <Stack screenOptions={{ headerShown: false }}>
+              <Stack.Screen name="(tabs)" />
+              <Stack.Screen name="modal" options={{ presentation: "modal" }} />
+            </Stack>
+          </SafeAreaView>
+        </AuthContext.Provider>
+      </ThemeProvider>
+    </SafeAreaProvider>
   )
 }
