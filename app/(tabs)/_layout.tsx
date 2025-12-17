@@ -2,7 +2,7 @@ import { Ionicons } from "@expo/vector-icons";
 import { type BottomTabBarButtonProps } from "@react-navigation/bottom-tabs";
 import { Tabs, useRouter } from "expo-router";
 import React, { useContext, useRef, useState } from "react";
-import { Animated, Modal, Pressable, Text, TouchableOpacity, View } from "react-native";
+import { Animated, Modal, Pressable, Text, TouchableOpacity, useColorScheme, View } from "react-native";
 import { AuthContext } from "../_layout";
 
 const AnimatedTabBarButton = ({
@@ -50,6 +50,7 @@ const AnimatedTabBarButton = ({
 
 export default function TabsLayout() {
     const router = useRouter();
+    const colorScheme = useColorScheme();
 
     const [isLoginModalOpen, setIsLoginModalOpen] = useState(false);
     const { user } = useContext(AuthContext);
@@ -74,6 +75,11 @@ export default function TabsLayout() {
                 backBehavior="history"
                 screenOptions={{
                     headerShown: false,
+                    tabBarStyle: {
+                        backgroundColor: colorScheme === "dark" ? "#101010" : "white",
+                        borderTopWidth: 0,
+                        height: 32
+                    },
                     tabBarButton: (props) => <AnimatedTabBarButton {...props} />,
                 }}
             >
@@ -85,7 +91,13 @@ export default function TabsLayout() {
                             <Ionicons
                                 name="home"
                                 size={24}
-                                color={focused ? "black" : "gray"}
+                                color={
+                                    focused
+                                        ? colorScheme === "dark"
+                                            ? "white"
+                                            : "black"
+                                        : "gray"
+                                }
                             />
                         )
                     }}
@@ -98,7 +110,13 @@ export default function TabsLayout() {
                             <Ionicons
                                 name="search"
                                 size={24}
-                                color={focused ? "black" : "gray"}
+                                color={
+                                    focused
+                                        ? colorScheme === "dark"
+                                            ? "white"
+                                            : "black"
+                                        : "gray"
+                                }
                             />
                         )
                     }}
@@ -121,7 +139,13 @@ export default function TabsLayout() {
                             <Ionicons
                                 name="add"
                                 size={24}
-                                color={focused ? "black" : "gray"}
+                                color={
+                                    focused
+                                        ? colorScheme === "dark"
+                                            ? "white"
+                                            : "black"
+                                        : "gray"
+                                }
                             />
                         )
                     }}
@@ -142,7 +166,13 @@ export default function TabsLayout() {
                             <Ionicons
                                 name="heart-outline"
                                 size={24}
-                                color={focused ? "black" : "gray"}
+                                color={
+                                    focused
+                                        ? colorScheme === "dark"
+                                            ? "white"
+                                            : "black"
+                                        : "gray"
+                                }
                             />
                         )
                     }}
@@ -164,7 +194,13 @@ export default function TabsLayout() {
                             <Ionicons
                                 name="person-outline"
                                 size={24}
-                                color={focused ? "black" : "gray"}
+                                color={
+                                    focused
+                                        ? colorScheme === "dark"
+                                            ? "white"
+                                            : "black"
+                                        : "gray"
+                                }
                             />
                         )
                     }}
